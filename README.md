@@ -2,8 +2,6 @@
 
 A sleek macOS menu bar app that prevents your Mac from sleeping using the system `caffeinate` command.
 
-![StayZen](https://i.imgur.com/MiXGqeR.jpeg)
-
 ## Features
 
 - ⚡ **Quick Presets** - One-click keep awake for 30min, 1hr, or 2hr
@@ -12,6 +10,12 @@ A sleek macOS menu bar app that prevents your Mac from sleeping using the system
 - 🔔 **Notifications** - Get notified when sleep prevention starts/stops
 - 🚀 **Launch at Login** - Auto-start when you log in
 - 📌 **Menu Bar** - Runs quietly in your menu bar
+- 📊 **History** - Track total time and sessions
+
+## TODO
+
+- [ ] Add app icons to dropdown
+- [ ] Add History to view total time and past sessions
 
 ## Download
 
