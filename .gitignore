@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+frontend/node_modules/
+electron/node_modules/
+
+# Build outputs
+dist/
+dist-electron/
+frontend/dist/
+electron/dist/
+release/
+*.dmg
+*.blockmap
+
+# Go
+backend/stayzen
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Temp
+tmp/
+temp/
+*.tmp
+# AGENT
+SPEC.md
