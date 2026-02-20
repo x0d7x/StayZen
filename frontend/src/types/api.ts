@@ -6,14 +6,34 @@ export interface Status {
   started_at: string;
 }
 
+export interface AppInfo {
+  name: string;
+  path: string;
+}
+
+export interface HistoryEntry {
+  id: number;
+  mode: string;
+  app_name: string;
+  duration: number;
+  started_at: string;
+  ended_at: string;
+}
+
+export interface HistoryData {
+  entries: HistoryEntry[];
+  total_seconds: number;
+}
+
 export interface StayZenAPI {
   startTimeMode: (seconds: number) => Promise<Status>;
   startMonitorMode: (appName: string) => Promise<Status>;
   stop: () => Promise<Status>;
   getStatus: () => Promise<Status>;
-  getRunningApps: () => Promise<string[]>;
+  getRunningApps: () => Promise<AppInfo[]>;
   getAutoLaunch: () => Promise<boolean>;
   setAutoLaunch: (enabled: boolean) => Promise<{ success: boolean }>;
+  getHistory: () => Promise<HistoryData>;
 }
 
 declare global {

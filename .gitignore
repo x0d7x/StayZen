@@ -35,3 +35,4 @@ temp/
 *.tmp
 # AGENT
 SPEC.md
+electron/backend/stayzen

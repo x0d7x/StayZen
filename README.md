@@ -14,8 +14,8 @@ A sleek macOS menu bar app that prevents your Mac from sleeping using the system
 
 ## TODO
 
-- [ ] Add app icons to dropdown
-- [ ] Add History to view total time and past sessions
+- [x] Add app icons to dropdown
+- [x] Add History to view total time and past sessions
 
 ## Download
 

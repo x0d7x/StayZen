@@ -13,9 +13,24 @@ export interface StayZenAPI {
   startMonitorMode: (appName: string) => Promise<Status>;
   stop: () => Promise<Status>;
   getStatus: () => Promise<Status>;
-  getRunningApps: () => Promise<string[]>;
+  getRunningApps: () => Promise<AppInfo[]>;
   getAutoLaunch: () => Promise<boolean>;
   setAutoLaunch: (enabled: boolean) => Promise<{ success: boolean }>;
+  getHistory: () => Promise<{ entries: HistoryEntry[]; total_seconds: number }>;
+}
+
+export interface AppInfo {
+  name: string;
+  path: string;
+}
+
+export interface HistoryEntry {
+  id: number;
+  mode: string;
+  app_name: string;
+  duration: number;
+  started_at: string;
+  ended_at: string;
 }
 
 const api: StayZenAPI = {
@@ -26,6 +41,7 @@ const api: StayZenAPI = {
   getRunningApps: () => ipcRenderer.invoke('stayzen:getRunningApps'),
   getAutoLaunch: () => ipcRenderer.invoke('stayzen:getAutoLaunch'),
   setAutoLaunch: (enabled: boolean) => ipcRenderer.invoke('stayzen:setAutoLaunch', enabled),
+  getHistory: () => ipcRenderer.invoke('stayzen:getHistory'),
 };
 
 contextBridge.exposeInMainWorld('stayzen', api);

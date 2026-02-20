@@ -1,8 +1,12 @@
 import React from 'react';
 
-const Header: React.FC = () => {
+interface HeaderProps {
+  onHistoryClick: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ onHistoryClick }) => {
   return (
-    <header style={{ textAlign: 'center' }}>
+    <header>
       <h1 style={{ 
         fontSize: '24px', 
         fontWeight: 600, 
@@ -15,6 +19,9 @@ const Header: React.FC = () => {
         <span>⚡</span>
         <span>StayZen</span>
       </h1>
+      <button className="history-btn" onClick={onHistoryClick} title="History">
+        📊
+      </button>
     </header>
   );
 };

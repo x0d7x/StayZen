@@ -24,12 +24,26 @@ type PowerState struct {
 	mu         sync.RWMutex
 }
 
+type HistoryEntry struct {
+	ID        int       `json:"id"`
+	Mode      string    `json:"mode"`
+	AppName   string    `json:"app_name,omitempty"`
+	Duration  int       `json:"duration"`
+	StartedAt time.Time `json:"started_at"`
+	EndedAt   time.Time `json:"ended_at"`
+}
+
 type StatusResponse struct {
 	Mode             string `json:"mode"`
 	Active           bool   `json:"active"`
 	RemainingSeconds int    `json:"remaining_seconds"`
 	AppName          string `json:"app_name"`
 	StartedAt        string `json:"started_at"`
+}
+
+type HistoryResponse struct {
+	Entries      []HistoryEntry `json:"entries"`
+	TotalSeconds int            `json:"total_seconds"`
 }
 
 type RequestBody struct {
@@ -43,6 +57,9 @@ var (
 		Active: false,
 	}
 	serverPort = "8080"
+	history    []HistoryEntry
+	historyID  = 0
+	historyMu  sync.Mutex
 )
 
 func main() {
@@ -57,6 +74,7 @@ func main() {
 	http.HandleFunc("/status", handleStatus)
 	http.HandleFunc("/health", handleHealth)
 	http.HandleFunc("/running-apps", handleRunningApps)
+	http.HandleFunc("/history", handleHistory)
 
 	addr := "127.0.0.1:" + serverPort
 	log.Printf("Server listening on http://%s", addr)
@@ -254,6 +272,16 @@ func handleStop(w http.ResponseWriter, r *http.Request) {
 
 	powerState.mu.Lock()
 
+	var previousMode string
+	var previousAppName string
+	var previousStartedAt time.Time
+
+	if powerState.Active || powerState.Mode != "idle" {
+		previousMode = powerState.Mode
+		previousAppName = powerState.AppName
+		previousStartedAt = powerState.StartedAt
+	}
+
 	if powerState.CancelFunc != nil {
 		powerState.CancelFunc()
 		powerState.CancelFunc = nil
@@ -270,6 +298,14 @@ func handleStop(w http.ResponseWriter, r *http.Request) {
 	powerState.EndTime = time.Time{}
 
 	powerState.mu.Unlock()
+
+	if previousMode != "" && previousMode != "idle" {
+		duration := int(time.Since(previousStartedAt).Seconds())
+		if duration > 5 {
+			addHistoryEntry(previousMode, previousAppName, duration, previousStartedAt)
+		}
+	}
+
 	respondWithStatus(w, http.StatusOK)
 }
 
@@ -317,24 +353,54 @@ func handleRunningApps(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cmd := exec.Command("osascript", "-e", `tell application "System Events" to get name of every process whose background only is false`)
+	cmd := exec.Command("osascript", "-e", `
+		set appList to {}
+		tell application "System Events"
+			repeat with proc in (every process whose background only is false)
+				set appName to name of proc
+				if appName is not "Finder" then
+					try
+						set appPath to path of application appName
+						set end of appList to {appName, appPath}
+					on error
+						set end of appList to {appName, ""}
+					end try
+				end if
+			end repeat
+		end tell
+		return appList
+	`)
 	output, err := cmd.Output()
 	if err != nil {
 		http.Error(w, "Failed to get running apps", http.StatusInternalServerError)
 		return
 	}
 
+	type AppInfo struct {
+		Name string `json:"name"`
+		Path string `json:"path"`
+	}
+
+	var apps []AppInfo
 	outputStr := strings.TrimSpace(string(output))
-	var apps []string
-	for _, app := range strings.Split(outputStr, ", ") {
-		app = strings.TrimSpace(app)
-		if app != "" && app != "Finder" {
-			apps = append(apps, app)
+	outputStr = strings.TrimPrefix(outputStr, "{")
+	outputStr = strings.TrimSuffix(outputStr, "}")
+
+	if outputStr != "" {
+		items := strings.Split(outputStr, "}, {")
+		for _, item := range items {
+			item = strings.Trim(item, "{}")
+			parts := strings.Split(item, ", ")
+			if len(parts) >= 2 {
+				name := strings.Trim(parts[0], "\"")
+				path := strings.Trim(parts[1], "\"")
+				apps = append(apps, AppInfo{Name: name, Path: path})
+			}
 		}
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string][]string{"apps": apps})
+	json.NewEncoder(w).Encode(map[string][]AppInfo{"apps": apps})
 }
 
 func splitLines(s string) []string {
@@ -360,6 +426,49 @@ func trimSpace(s string) string {
 		end--
 	}
 	return s[start:end]
+}
+
+func handleHistory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	historyMu.Lock()
+	defer historyMu.Unlock()
+
+	var totalSeconds int
+	for _, entry := range history {
+		totalSeconds += entry.Duration
+	}
+
+	response := HistoryResponse{
+		Entries:      history,
+		TotalSeconds: totalSeconds,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func addHistoryEntry(mode, appName string, duration int, startedAt time.Time) {
+	historyMu.Lock()
+	defer historyMu.Unlock()
+
+	historyID++
+	entry := HistoryEntry{
+		ID:        historyID,
+		Mode:      mode,
+		AppName:   appName,
+		Duration:  duration,
+		StartedAt: startedAt,
+		EndedAt:   time.Now(),
+	}
+
+	history = append([]HistoryEntry{entry}, history...)
+	if len(history) > 50 {
+		history = history[:50]
+	}
 }
 
 func init() {

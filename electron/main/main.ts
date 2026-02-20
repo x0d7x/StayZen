@@ -352,3 +352,22 @@ ipcMain.handle('stayzen:setAutoLaunch', async (_, enabled: boolean) => {
     throw error;
   }
 });
+
+ipcMain.handle('stayzen:getHistory', async () => {
+  try {
+    const response = await apiRequest<{ entries: HistoryEntry[]; total_seconds: number }>('/history', 'GET');
+    return response;
+  } catch (error) {
+    log.error('getHistory error:', error);
+    throw error;
+  }
+});
+
+interface HistoryEntry {
+  id: number;
+  mode: string;
+  app_name: string;
+  duration: number;
+  started_at: string;
+  ended_at: string;
+}

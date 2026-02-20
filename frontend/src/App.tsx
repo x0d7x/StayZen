@@ -6,6 +6,7 @@ import MonitorMode from './components/MonitorMode';
 import StatusIndicator from './components/StatusIndicator';
 import Footer from './components/Footer';
 import Settings from './components/Settings';
+import History from './components/History';
 
 const App: React.FC = () => {
   const [status, setStatus] = useState<Status>({
@@ -18,6 +19,7 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [autoStart, setAutoStart] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -90,7 +92,7 @@ const App: React.FC = () => {
   return (
     <div className="app">
       <div className="container">
-        <Header />
+        <Header onHistoryClick={() => setShowHistory(true)} />
         
         <div className="content">
           <TimeMode
@@ -121,6 +123,8 @@ const App: React.FC = () => {
         
         <Footer onStop={handleStop} disabled={!status.active || loading} isStopping={loading} />
       </div>
+      
+      <History isOpen={showHistory} onClose={() => setShowHistory(false)} />
     </div>
   );
 };

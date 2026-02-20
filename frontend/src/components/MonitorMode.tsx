@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { AppInfo } from '../types/api';
 
 interface MonitorModeProps {
   onStart: (appName: string) => void;
@@ -14,14 +15,15 @@ const MonitorMode: React.FC<MonitorModeProps> = ({
   currentApp 
 }) => {
   const [appName, setAppName] = useState('');
-  const [runningApps, setRunningApps] = useState<string[]>([]);
+  const [runningApps, setRunningApps] = useState<AppInfo[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadApps = async () => {
       try {
         const apps = await window.stayzen.getRunningApps();
-        setRunningApps(apps.sort());
+        setRunningApps(apps.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (err) {
         console.error('Failed to load running apps:', err);
       }
@@ -30,26 +32,37 @@ const MonitorMode: React.FC<MonitorModeProps> = ({
     loadApps();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleStart = () => {
     if (appName.trim()) {
       onStart(appName.trim());
     }
   };
 
-  const handleSelectApp = (app: string) => {
-    setAppName(app);
+  const handleSelectApp = (app: AppInfo) => {
+    setAppName(app.name);
     setShowDropdown(false);
   };
 
   const filteredApps = runningApps.filter(app => 
-    app.toLowerCase().includes(appName.toLowerCase())
+    app.name.toLowerCase().includes(appName.toLowerCase())
   );
 
   return (
     <div className={`section ${isActive ? 'active-section' : ''}`}>
       <div className="section-title">🖥 Monitor Application</div>
       
-      <div className="input-group monitor-input-wrapper">
+      <div className="input-group monitor-input-wrapper" ref={dropdownRef}>
         <div className="select-wrapper">
           <input
             type="text"
@@ -67,11 +80,14 @@ const MonitorMode: React.FC<MonitorModeProps> = ({
             <div className="dropdown">
               {filteredApps.slice(0, 8).map((app) => (
                 <div
-                  key={app}
+                  key={app.name}
                   className="dropdown-item"
                   onClick={() => handleSelectApp(app)}
                 >
-                  {app}
+                  <span className="app-icon">
+                    <span className="app-icon-placeholder">📦</span>
+                  </span>
+                  <span className="app-name">{app.name}</span>
                 </div>
               ))}
             </div>

@@ -1,6 +1,6 @@
 {
   "name": "stayzen",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "macOS desktop app to prevent sleep",
   "private": true,
   "scripts": {
@@ -12,7 +12,7 @@
     "build:frontend": "cd frontend && npm run build",
     "build:electron": "cd electron && npm run build:electron",
     "build:backend": "cd backend && go build -o stayzen .",
-    "package": "npm run build && npm run build:backend && electron-builder",
+    "package": "npm run build && npm run build:backend && cd electron && npx electron-builder",
     "start": "electron ."
   },
   "devDependencies": {
