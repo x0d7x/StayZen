@@ -196,7 +196,8 @@ function createWindow(): void {
     width: 400,
     height: 560,
     resizable: false,
-    frame: true,
+    frame: false,
+    titleBarStyle: 'hiddenInset',
     center: true,
     backgroundColor: '#00000000',
     webPreferences: {

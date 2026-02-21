@@ -6,7 +6,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onHistoryClick }) => {
   return (
-    <header>
+    <header style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}>
       <h1 style={{ 
         fontSize: '24px', 
         fontWeight: 600, 
@@ -19,7 +19,12 @@ const Header: React.FC<HeaderProps> = ({ onHistoryClick }) => {
         <span>⚡</span>
         <span>StayZen</span>
       </h1>
-      <button className="history-btn" onClick={onHistoryClick} title="History">
+      <button 
+        className="history-btn" 
+        onClick={onHistoryClick} 
+        title="History"
+        style={{ WebkitAppRegion: 'no-drag' } as React.CSSProperties}
+      >
         📊
       </button>
     </header>
