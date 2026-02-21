@@ -17,15 +17,40 @@ interface HistoryProps {
 const History: React.FC<HistoryProps> = ({ isOpen, onClose }) => {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [totalSeconds, setTotalSeconds] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (isOpen) {
+      setLoading(true);
       window.stayzen.getHistory().then((data) => {
-        setEntries(data.entries);
-        setTotalSeconds(data.total_seconds);
-      }).catch(console.error);
+        setEntries(data.entries || []);
+        setTotalSeconds(data.total_seconds || 0);
+      }).catch((err) => {
+        console.error('Failed to load history:', err);
+        setEntries([]);
+        setTotalSeconds(0);
+      }).finally(() => {
+        setLoading(false);
+      });
+      
+      window.history.pushState({ historyOpen: true }, '');
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (isOpen) {
+        onClose();
+      }
+    };
+    
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isOpen, onClose]);
+
+  const handleClose = () => {
+    window.history.back();
+  };
 
   const formatDuration = (seconds: number): string => {
     const h = Math.floor(seconds / 3600);
@@ -47,11 +72,11 @@ const History: React.FC<HistoryProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="history-overlay" onClick={onClose}>
+    <div className="history-overlay" onClick={handleClose}>
       <div className="history-modal" onClick={(e) => e.stopPropagation()}>
         <div className="history-header">
           <h2>History</h2>
-          <button className="close-btn" onClick={onClose}>×</button>
+          <button className="close-btn" onClick={handleClose}>×</button>
         </div>
         
         <div className="history-stats">
@@ -66,7 +91,9 @@ const History: React.FC<HistoryProps> = ({ isOpen, onClose }) => {
         </div>
 
         <div className="history-list">
-          {entries.length === 0 ? (
+          {loading ? (
+            <div className="history-empty">Loading...</div>
+          ) : entries.length === 0 ? (
             <div className="history-empty">No history yet</div>
           ) : (
             entries.map((entry) => (

@@ -8,13 +8,13 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:electron\"",
     "dev:frontend": "vite",
-    "dev:electron": "tsc -p tsconfig.electron.json && electron .",
+    "dev:electron": "tsc -p tsconfig.electron.json && npx electron .",
     "build": "npm run build:frontend && npm run build:electron",
     "build:frontend": "cd ../frontend && npm run build",
     "build:electron": "tsc -p tsconfig.electron.json",
     "copy-frontend": "rm -rf dist/frontend && cp -r ../frontend/dist dist/frontend",
-    "package": "npm run build && npm run copy-frontend && electron-builder",
-    "start": "electron ."
+    "package": "npm run build && npm run copy-frontend && npx electron-builder",
+    "start": "npx electron ."
   },
   "build": {
     "appId": "com.stayzen.app",

@@ -1,3 +1,5 @@
+![StayZen](https://i.imgur.com/H6sY4q9.png)
+
 # StayZen
 
 A sleek macOS menu bar app that prevents your Mac from sleeping using the system `caffeinate` command.

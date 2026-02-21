@@ -7,13 +7,13 @@
     "install:all": "cd frontend && npm install && cd ../electron && npm install",
     "dev": "concurrently -k \"npm run dev:frontend\" \"npm run dev:electron\"",
     "dev:frontend": "cd frontend && npm run dev",
-    "dev:electron": "cd electron && npm run build:electron && electron .",
+    "dev:electron": "cd electron && npm run build:electron && npx electron .",
     "build": "npm run build:frontend && npm run build:electron",
     "build:frontend": "cd frontend && npm run build",
     "build:electron": "cd electron && npm run build:electron",
     "build:backend": "cd backend && go build -o stayzen .",
     "package": "npm run build && npm run build:backend && cd electron && npx electron-builder",
-    "start": "electron ."
+    "start": "cd electron && npx electron ."
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
