@@ -1,4 +1,4 @@
-![StayZen](https://i.imgur.com/H6sY4q9.png)
+![StayZen](https://i.imgur.com/ALtspsx.jpeg)
 
 # StayZen
 
