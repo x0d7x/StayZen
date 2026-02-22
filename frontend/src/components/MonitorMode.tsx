@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AppInfo } from '../types/api';
+import { stayzen } from '../api';
 
 interface MonitorModeProps {
   onStart: (appName: string) => void;
@@ -22,7 +23,7 @@ const MonitorMode: React.FC<MonitorModeProps> = ({
   useEffect(() => {
     const loadApps = async () => {
       try {
-        const apps = await window.stayzen.getRunningApps();
+        const apps = await stayzen.getRunningApps();
         setRunningApps(apps.sort((a, b) => a.name.localeCompare(b.name)));
       } catch (err) {
         console.error('Failed to load running apps:', err);
@@ -76,7 +77,7 @@ const MonitorMode: React.FC<MonitorModeProps> = ({
             onFocus={() => setShowDropdown(true)}
             onKeyPress={(e) => e.key === 'Enter' && handleStart()}
           />
-          {showDropdown && appName && filteredApps.length > 0 && !isActive && (
+          {showDropdown && !isActive && runningApps.length > 0 && (
             <div className="dropdown">
               {filteredApps.slice(0, 8).map((app) => (
                 <div

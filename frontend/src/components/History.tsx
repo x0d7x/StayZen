@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { stayzen } from '../api';
 
 interface HistoryEntry {
   id: number;
@@ -22,7 +23,7 @@ const History: React.FC<HistoryProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setLoading(true);
-      window.stayzen.getHistory().then((data) => {
+      stayzen.getHistory().then((data) => {
         setEntries(data.entries || []);
         setTotalSeconds(data.total_seconds || 0);
       }).catch((err) => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Status } from './types/api';
+import { stayzen } from './api';
 import Header from './components/Header';
 import TimeMode from './components/TimeMode';
 import MonitorMode from './components/MonitorMode';
@@ -23,7 +24,7 @@ const App: React.FC = () => {
 
   const fetchStatus = useCallback(async () => {
     try {
-      const newStatus = await window.stayzen.getStatus();
+      const newStatus = await stayzen.getStatus();
       setStatus(newStatus);
       setError(null);
     } catch (err) {
@@ -38,13 +39,13 @@ const App: React.FC = () => {
   }, [fetchStatus]);
 
   useEffect(() => {
-    window.stayzen.getAutoLaunch().then(setAutoStart).catch(() => {});
+    stayzen.getAutoLaunch().then(setAutoStart).catch(() => {});
   }, []);
 
   const handleStartTimeMode = async (seconds: number) => {
     setLoading(true);
     try {
-      const newStatus = await window.stayzen.startTimeMode(seconds);
+      const newStatus = await stayzen.startTimeMode(seconds);
       setStatus(newStatus);
       setError(null);
     } catch (err) {
@@ -57,7 +58,7 @@ const App: React.FC = () => {
   const handleStartMonitorMode = async (appName: string) => {
     setLoading(true);
     try {
-      const newStatus = await window.stayzen.startMonitorMode(appName);
+      const newStatus = await stayzen.startMonitorMode(appName);
       setStatus(newStatus);
       setError(null);
     } catch (err) {
@@ -70,7 +71,7 @@ const App: React.FC = () => {
   const handleStop = async () => {
     setLoading(true);
     try {
-      const newStatus = await window.stayzen.stop();
+      const newStatus = await stayzen.stop();
       setStatus(newStatus);
       setError(null);
     } catch (err) {
@@ -82,7 +83,7 @@ const App: React.FC = () => {
 
   const handleAutoStartChange = async (enabled: boolean) => {
     try {
-      await window.stayzen.setAutoLaunch(enabled);
+      await stayzen.setAutoLaunch(enabled);
       setAutoStart(enabled);
     } catch (err) {
       setError('Failed to change auto-start setting');
